@@ -51,6 +51,7 @@ void check_board()
 void board_ini()
 {
   int i;
+
   for(i = 0; i < ALLBOARD-WIDTH; i++)
     {
       if( i < WIDTH){
@@ -77,7 +78,7 @@ int check_put(int x,int y)
   if(z <= ALLBOARD && board[z] == EMPTY && check_warning(z) == 0){
     board[z] = color;
   }else{
-    printf("Put error\n");
+    printf("Put error.\n");
     z=-1;
   }
   return z;
@@ -90,9 +91,8 @@ int check_warning(int z)
   check = 0;
   flag = 0;
 
-  printf("flag_ini;%d\n",flag);
-  printf("color;%d\n",color);
-  printf("z;%d\n",z);
+  //printf("color;%d\n",color);
+  //printf("z;%d\n",z);
 
   if(color == BLACK){
     for(i=0;i<4;i++){
@@ -105,7 +105,7 @@ int check_warning(int z)
   }else{
     for(i=0;i<4;i++){
       check = z + dir4[i];
-      printf("check[%d];%d\n",i,check);
+  //printf("check[%d];%d\n",i,check);
       if(board[check] == WHITE){;
       }else if(board[check] != EMPTY ){
 	flag += 1;
@@ -113,10 +113,10 @@ int check_warning(int z)
     }
   }
 
-  printf("flag;%d\n",flag);
+  //printf("flag;%d\n",flag);
 
   if(flag == 4){
-    printf("Put error\n");
+    printf("Here is ban position.\n");
     return -1;
       }
   
