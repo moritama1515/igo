@@ -9,19 +9,20 @@
 #define WALL 3
 
 int board[ALLBOARD] = {};
+int check_board[ALLBOARD] = {};
 int dir4[4] = {+1,+WIDTH,-1,-WIDTH};
 int dir8[8] = {};   
 int color,z,black_a,white_a;
 
-void check_board(void);
-void board_ini(void);
-int check_put(int x,int y);
-int flip_color(int color);
-int check_warning(int z);
-int take_stone(int z);
-void remove_stone(void);
+void CheckBoard(void);
+void BoardIni(void);
+int CheckPut(int x,int y);
+int FlipColor(int color);
+int CheckWarning(int z);
+int TakeStone(int z);
+void RemoveStone(void);
 
-void check_board(void)
+void CheckBoard(void)
 {
   int i = 0;
   int mapy = 0;
@@ -53,7 +54,7 @@ void check_board(void)
   printf("BLACK:%d,WHITE:%d\n",black_a,white_a);
 }
 
-void board_ini()
+void BoardIni()
 {
   int i;
 
@@ -61,29 +62,34 @@ void board_ini()
     {
       if( i < WIDTH){
 	board[i] = WALL;
+	check_board[i] = WALL;
       }else if((i+1) % WIDTH == 0 || i % WIDTH == 0){
 	board[i] = WALL;
+	check_board[i] = WALL;
       }else{
 	board[i] = EMPTY;
+	check_board[i] = EMPTY;
       }
     }
 
-  for(i = (ALLBOARD-WIDTH);i < ALLBOARD;i++)
+  for(i = (ALLBOARD-WIDTH);i < ALLBOARD;i++){
     board[i] = WALL;
+    check_board[i] = WALL;
+  }
 
   black_a = 0;
   white_a = 0;
 }
 
-int flip_color(int color)
+int FlipColor(int color)
 {
   return 3 - color;
 }
 
-int check_put(int x,int y)
+int CheckPut(int x,int y)
 {
   z = (WIDTH*y) + x;
-  if(z <= ALLBOARD && board[z] == EMPTY && check_warning(z) == 0){
+  if(z <= ALLBOARD && board[z] == EMPTY && CheckWarning(z) == 0){
     board[z] = color;
   }else{
     printf("Put error.\n");
@@ -92,7 +98,7 @@ int check_put(int x,int y)
   return z;
 }
 
-int check_warning(int z)
+int CheckWarning(int z)
 {
   int check,flag,i;
 
@@ -131,12 +137,20 @@ int check_warning(int z)
   return 0;
 }
 
-int take_stone(int z)
+int TakeStone(int z)
 {
-
+  int check;
+  
+  for(i = 0; i < 4; i++){
+    check = z + dir4[i];
+    
+  }
+  
+  return 0;
+      
 }
   
-void remove_stone()
+void RemoveStone()
 {
 
 }
@@ -144,22 +158,23 @@ void remove_stone()
     {  
   
   int *inputx,*inputy;
-  board_ini();
+  
+  BoardIni();
 
   color = BLACK;
-  check_board();
+  CheckBoard();
   printf("BLACK TURN\nx->"); scanf("%d",&inputx);
   printf("y->"); scanf("%d",&inputy);
-  check_put(inputx,inputy);
+  CheckPut(inputx,inputy);
   if(z == -1){
     printf("end\n");
   }
-  check_board();
+  CheckBoard();
   printf("z:%d %d-%d\n",color,inputx,inputy);
   
   while(1)
     {
-      color = flip_color(color);
+      color = FlipColor(color);
       if(color == 1){
       printf("BLACK TURN\nx->");
       }else{
@@ -167,12 +182,12 @@ void remove_stone()
       }
       scanf("%d",&inputx);
       printf("y->"); scanf("%d",&inputy);
-      check_put(inputx,inputy);
+      CheckPut(inputx,inputy);
       if(z == -1){
 	printf("end\n");
 	break;
       }
-      check_board();
+      CheckBoard();
       printf("z:%d %d-%d\n",color,inputx,inputy);
     }
   
