@@ -11,13 +11,17 @@
 int board[ALLBOARD] = {};
 int dir4[4] = {+1,+WIDTH,-1,-WIDTH};
 int dir8[8] = {};   
-int color,z;
+int color,z,black_a,white_a;
 
+void check_board(void);
+void board_ini(void);
 int check_put(int x,int y);
 int flip_color(int color);
 int check_warning(int z);
+int take_stone(int z);
+void remove_stone(void);
 
-void check_board()
+void check_board(void)
 {
   int i = 0;
   int mapy = 0;
@@ -46,6 +50,7 @@ void check_board()
 	printf("%3d\n",board[i]);
       }
     }
+  printf("BLACK:%d,WHITE:%d\n",black_a,white_a);
 }
 
 void board_ini()
@@ -65,6 +70,9 @@ void board_ini()
 
   for(i = (ALLBOARD-WIDTH);i < ALLBOARD;i++)
     board[i] = WALL;
+
+  black_a = 0;
+  white_a = 0;
 }
 
 int flip_color(int color)
@@ -123,8 +131,17 @@ int check_warning(int z)
   return 0;
 }
 
-int main()
-{  
+int take_stone(int z)
+{
+
+}
+  
+void remove_stone()
+{
+
+}
+    int main()
+    {  
   
   int *inputx,*inputy;
   board_ini();
