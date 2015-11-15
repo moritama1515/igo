@@ -7,20 +7,24 @@
 #define BLACK 1
 #define WHITE 2
 #define WALL 3
+#define MARK 1
+
 
 int board[ALLBOARD] = {};
 int check_board[ALLBOARD] = {};
 int dir4[4] = {+1,+WIDTH,-1,-WIDTH};
 int dir8[8] = {};   
-int color,z,black_a,white_a;
+int color,z,prisoner_b,prisoner_w;
 
 void CheckBoard(void);
 void BoardIni(void);
+void ClearCheckBoard(void);
 int CheckPut(int x,int y);
 int FlipColor(int color);
 int CheckWarning(int z);
 int TakeStone(int z);
-void RemoveStone(void);
+int RemoveStone(int z);
+int RemoveCount(int z);
 
 void CheckBoard(void)
 {
@@ -51,7 +55,7 @@ void CheckBoard(void)
 	printf("%3d\n",board[i]);
       }
     }
-  printf("BLACK:%d,WHITE:%d\n",black_a,white_a);
+  printf("BLACK:%d,WHITE:%d\n",prisoner_b,prisoner_w);
 }
 
 void BoardIni()
@@ -76,9 +80,27 @@ void BoardIni()
     board[i] = WALL;
     check_board[i] = WALL;
   }
+  prisoner_b = 0;
+  prisoner_w = 0;
+}
 
-  black_a = 0;
-  white_a = 0;
+void ClearCheckBoard()
+{
+  int i;
+  for(i = 0; i < ALLBOARD-WIDTH; i++)
+    {
+      if( i < WIDTH){
+	check_board[i] = WALL;
+      }else if((i+1) % WIDTH == 0 || i % WIDTH == 0){
+	check_board[i] = WALL;
+      }else{
+	check_board[i] = EMPTY;
+      }
+    }
+
+  for(i = (ALLBOARD-WIDTH);i < ALLBOARD;i++){
+    check_board[i] = WALL;
+  }
 }
 
 int FlipColor(int color)
@@ -88,13 +110,34 @@ int FlipColor(int color)
 
 int CheckPut(int x,int y)
 {
+  int i,check;
+
   z = (WIDTH*y) + x;
-  if(z <= ALLBOARD && board[z] == EMPTY && CheckWarning(z) == 0){
+  if(z <= ALLBOARD && board[z] == EMPTY && CheckWarning(z) != -1){
     board[z] = color;
   }else{
     printf("Put error.\n");
-    z=-1;
+    z = -1;
   }
+  
+  for(i = 0; i < 4; i++){
+    if(color == BLACK){
+      check = z +dir4[i];
+      if(TakeStone(check) == 0){
+	prisoner_b = RemoveStone(check);
+      }else{
+	ClearCheckBoard;
+      }
+    }else{
+      check = z +dir4[i];
+      if(TakeStone(check) == 0){
+        prisoner_b = RemoveStone(check);
+      }else{
+	ClearCheckBoard;
+      } 
+    }
+  }
+  
   return z;
 }
 
@@ -139,23 +182,69 @@ int CheckWarning(int z)
 
 int TakeStone(int z)
 {
-  int check;
+  int i,check,rtn;
   
   for(i = 0; i < 4; i++){
     check = z + dir4[i];
+    if(check_board[check] == MARK){
+      return -1;
+    }
+
+    check_board[check] = MARK;
     
+    if(board[check] == EMPTY){
+      return FALSE;
+    }else if(board[check] == color){
+      rtn = TakeStone(check);
+      if(rtn == -1){
+	return -1;
+      }
+    }
   }
   
   return 0;
       
 }
   
-void RemoveStone()
+int RemoveStone(int z)
 {
+  int prisoner;
+  
+  if(board[z] == color){
+    return 0;
+  }
 
+  if(board[z] == EMPTY){
+    return 0;
+  }
+
+  ClearCheckBoard();
+
+  if(TakeStone(z) == 0){
+    prisoner = RemoveCount(z);
+    return prisoner;
+  }
+
+  return 0;
 }
-    int main()
-    {  
+
+int RemoveCount(int z)
+{
+  int i,check,prisoner;
+
+  for(i = 0; i < 4; i++){
+    check = z + dir4[i];
+    if(board[check] == color){
+      prisoner += 1;
+      board[check] = EMPTY;
+      prisoner = RemoveCount(z);
+    }
+  }
+  return prisoner;
+}
+
+int main()
+{  
   
   int *inputx,*inputy;
   
