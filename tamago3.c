@@ -24,7 +24,7 @@ int dir8[8] = {+1,+1+WIDTH,+WIDTH,-1+WIDTH,-1,-1-WIDTH,-WIDTH,+1-WIDTH};
 /* 手盤 */
 int color;
 /* 着手場所 */
-int z;
+int x,y,z;
 /* アゲハマ */
 int prisoner_b,prisoner_w;
 
@@ -40,6 +40,8 @@ void CheckBoard_check(void);
 void BoardIni(void);
 /* check_boardの初期化 */
 void ClearCheckBoard(void);
+/* 着手場所の入力 */
+void InputMap(int *x,int *y);
 /* 石を置く */
 int CheckPut(int x,int y);
 /* 色(手番)の反転 */
@@ -51,11 +53,11 @@ int TakeStone(int z);
 /* TakeStoneがTRUEならばRemoveCountを呼び出す */
 int RemoveStone(int z);
 /* 囲まれた石を取り除きアゲハマ(prisoner)を返す */
-int RemoveCount(int z);
+int RemoveCount(int z,int prisoner);
 
 
 
-
+/* 盤面(board)の表示 */
 void CheckBoard(void)
 {
   int i = 0;
@@ -88,6 +90,7 @@ void CheckBoard(void)
   printf("BLACK:%d,WHITE:%d\n",prisoner_b,prisoner_w);
 }
 
+/* check_boardの表示 */
 void CheckBoard_check(void)
 {
   int i = 0;
@@ -120,6 +123,7 @@ void CheckBoard_check(void)
   }
 }
 
+/* 盤面(board)の初期化 */
 void BoardIni()
 {
   int i;
@@ -144,6 +148,7 @@ void BoardIni()
   }
 }
 
+/* check_boardの初期化 */
 void ClearCheckBoard()
 {
   int i;
@@ -163,11 +168,39 @@ void ClearCheckBoard()
   }
 }
 
+/* 着手場所の入力 */
+void InputMap(int *x,int*y)
+{
+  int inputx,inputy;
+
+    /*手盤の反転*/
+    color = FlipColor(color);
+    CheckBoard();
+    while(1){
+      if(color == 1){
+	printf("BLACK TURN\nx->");
+      }else{
+	printf("WHITE TURN\nx->");
+      }
+      /*手の入力*/
+      scanf("%d",&inputx);
+      printf("y->"); scanf("%d",&inputy);
+      if(inputx < 20 && inputy < 20){
+	break;
+      }
+      printf("Try Again! Input is 0 ~ 19.\n");
+    }
+  *x = inputx;
+  *y = inputy;
+
+}
+/* 色(手番)の反転 */
 int FlipColor(int color)
 {
   return 3 - color;
 }
 
+/* 石を置く */
 int CheckPut(int x,int y)
 {
   int i,check;
@@ -194,6 +227,7 @@ int CheckPut(int x,int y)
     return z;
 }
 
+/* 自殺手かどうか調べる */
 int CheckWarning(int z)
 {
   int check,flag,i;
@@ -227,13 +261,12 @@ int CheckWarning(int z)
   return 0;
 }
 
+/* zの石が囲まれているか調べる */
 int TakeStone(int z)
 {
   int i,check,rtn,uncolor;
   
   uncolor = FlipColor(color);
-  printf("uncolor=%d\n",uncolor);
-
 
     if(check_board[z] == MARK ){
       return -1;
@@ -255,12 +288,12 @@ int TakeStone(int z)
     }
     return 0;   
 }
-  
+
+/* TakeStoneがTRUEならばRemoveCountを呼び出す */  
 int RemoveStone(int z)
 {
-  int prisoner;
+  int prisoner = 0;
 
-  printf("RemoveStone;%d\n",prisoner);  
   if(board[z] == color){
     return 0;
   }
@@ -272,31 +305,27 @@ int RemoveStone(int z)
   ClearCheckBoard();
 
   if(TakeStone(z) == 0){
-   prisoner = RemoveCount(z);
+    prisoner = RemoveCount(z,prisoner);
    return prisoner;  
   }
   return 0;
 }
 
-int RemoveCount(int z)
+/* 囲まれた石を取り除きアゲハマ(prisoner)を返す */
+int RemoveCount(int z,int prisoner)
 {
-  int i,check,prisoner,uncolor;
+  int i,check,uncolor;
 
   uncolor = FlipColor(color);
 
-  printf("removecount\n");
     if(board[z] == uncolor){
       prisoner++;
-      printf("RemoveCount;%d\n",prisoner);
       board[z] = EMPTY;
       for(i = 0; i < 4; i++){
 	check = z + dir4[i];
-	prisoner = RemoveCount(check);
-	printf("RemoveCount[%d];%d\n",i,prisoner);
+	prisoner = RemoveCount(check,prisoner);
       }
     }
-
-    printf("RemoveCountend;%d\n",prisoner);
     return prisoner;
 }
 
@@ -306,7 +335,7 @@ int RemoveCount(int z)
 int main()
 {  
   
-  int *inputx,*inputy;
+  int x,y;
   
   /*碁盤の初期化*/
   BoardIni();
@@ -318,30 +347,22 @@ int main()
   prisoner_w = 0;
 
   color = WHITE; //初手を黒にするために白を代入
- 
-  while(1)
-    {
-      /*碁盤を表示*/
-      CheckBoard();
-      /*手盤の反転*/
-      color = FlipColor(color);
-      if(color == 1){
-      printf("BLACK TURN\nx->");
-      }else{
-	printf("WHITE TURN\nx->");
-      }
-      /*手の入力*/
-      scanf("%d",&inputx);
-      printf("y->"); scanf("%d",&inputy);
-      /*着手*/
-      CheckPut(inputx,inputy);
-      if(z == -1){
-	printf("end\n");
-	break;
-      }
-      printf("z:%d %d-%d\n",z,inputx,inputy);
+
+  while(1){ 
+    /*着手場所の入力*/
+    InputMap(&x,&y);
+    /*着手*/
+    CheckPut(x,y);
+    if(z == -1){
+      printf("end\n");
     }
-  
+    if(x == 0 || y == 0){
+      printf("Program End\n");
+      break;
+    }
+    printf("z:%d %d-%d\n",z,x,y);
+  }
+
   return 0;
 }
 
