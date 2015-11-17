@@ -17,6 +17,7 @@ int dir8[8] = {};
 int color,z,prisoner_b,prisoner_w;
 
 void CheckBoard(void);
+void CheckBoard_check(void);
 void BoardIni(void);
 void ClearCheckBoard(void);
 int CheckPut(int x,int y);
@@ -33,13 +34,13 @@ void CheckBoard(void)
 
   printf("    ");
   while(1){
-  if(i != WIDTH){
-          printf("%02d ",i);
-	  i++;
-  }else{
-    printf("\n");
-    break;
-  }
+    if(i != WIDTH){
+      printf("%02d ",i);
+      i++;
+    }else{
+      printf("\n");
+      break;
+    }
   }
 
   printf("%02d ",mapy);
@@ -56,6 +57,38 @@ void CheckBoard(void)
       }
     }
   printf("BLACK:%d,WHITE:%d\n",prisoner_b,prisoner_w);
+}
+
+void CheckBoard_check(void)
+{
+  int i = 0;
+  int mapy = 0;
+
+  printf("check_board\n");
+  printf("    ");
+  while(1){
+    if(i != WIDTH){
+      printf("%02d ",i);
+      i++;
+    }else{
+      printf("\n");
+      break;
+    }
+  }
+
+  printf("%02d ",mapy);
+  mapy++;
+  for (i = 0; i < ALLBOARD; i++){
+    if((i+1) % WIDTH != 0){
+      printf("%3d",check_board[i]);
+    }else if(mapy < WIDTH){
+      printf("%3d\n%02d ",check_board[i],mapy);
+      mapy++;
+
+    }else{
+      printf("%3d\n",check_board[i]);
+    }
+  }
 }
 
 void BoardIni()
@@ -80,8 +113,6 @@ void BoardIni()
     board[i] = WALL;
     check_board[i] = WALL;
   }
-  prisoner_b = 0;
-  prisoner_w = 0;
 }
 
 void ClearCheckBoard()
@@ -117,28 +148,32 @@ int CheckPut(int x,int y)
     board[z] = color;
   }else{
     printf("Put error.\n");
-    z = -1;
+    return -1;
   }
   
-  for(i = 0; i < 4; i++){
     if(color == BLACK){
-      check = z +dir4[i];
-      if(TakeStone(check) == 0){
-	prisoner_b = RemoveStone(check);
-      }else{
-	ClearCheckBoard;
+      for(i = 0; i < 4; i++){
+	check = z + dir4[i];
+	printf("put[%d];%d\n",i,check);
+	if(TakeStone(check) == 0){
+	  prisoner_b = RemoveStone(check);
+	}else{
+	  ClearCheckBoard;
+	}
       }
     }else{
-      check = z +dir4[i];
-      if(TakeStone(check) == 0){
-        prisoner_b = RemoveStone(check);
-      }else{
-	ClearCheckBoard;
-      } 
-    }
-  }
-  
-  return z;
+      for(i = 0; i < 4; i++){
+	CheckBoard_check();
+	check = z + dir4[i];
+	printf("put[%d];%d\n",i,check);
+	if(TakeStone(check) == 0){
+	  prisoner_w = RemoveStone(check);
+	}else{
+	   ClearCheckBoard;
+	} 
+      }
+    }   
+    return z;
 }
 
 int CheckWarning(int z)
@@ -152,7 +187,7 @@ int CheckWarning(int z)
   //printf("z;%d\n",z);
 
   if(color == BLACK){
-    for(i=0;i<4;i++){
+    for(i = 0; i < 4; i++){
       check = z + dir4[i];
       if(board[check] == BLACK){;
       }else if(board[check] != EMPTY ){
@@ -160,7 +195,7 @@ int CheckWarning(int z)
       }
     }
   }else{
-    for(i=0;i<4;i++){
+    for(i = 0; i < 4; i++){
       check = z + dir4[i];
   //printf("check[%d];%d\n",i,check);
       if(board[check] == WHITE){;
@@ -184,26 +219,21 @@ int TakeStone(int z)
 {
   int i,check,rtn;
   
-  for(i = 0; i < 4; i++){
-    check = z + dir4[i];
-    if(check_board[check] == MARK){
+    if(check_board[z] == MARK ){
       return -1;
     }
-
-    check_board[check] = MARK;
     
-    if(board[check] == EMPTY){
-      return FALSE;
-    }else if(board[check] == color){
-      rtn = TakeStone(check);
-      if(rtn == -1){
-	return -1;
+    check_board[z] = MARK;
+      
+    if(board[z] == EMPTY){
+      for(i = 0; i < 4; i++){
+	check = z + dir4[i];
+	if(TakeStone(check) == -1){
+	  return -1;
+	}
       }
     }
-  }
-  
-  return 0;
-      
+    return 0;   
 }
   
 int RemoveStone(int z)
@@ -218,29 +248,32 @@ int RemoveStone(int z)
     return 0;
   }
 
+  if(board[z] == WALL){
+    return 0;
+  }
+
   ClearCheckBoard();
 
   if(TakeStone(z) == 0){
-    prisoner = RemoveCount(z);
-    return prisoner;
+   prisoner = RemoveCount(z);
+   return prisoner;  
   }
-
   return 0;
 }
 
 int RemoveCount(int z)
 {
   int i,check,prisoner;
-
-  for(i = 0; i < 4; i++){
-    check = z + dir4[i];
-    if(board[check] == color){
+  
+    if(board[z] == color){
       prisoner += 1;
-      board[check] = EMPTY;
-      prisoner = RemoveCount(z);
+      board[z] = EMPTY;
+      for(i = 0; i < 4; i++){
+	check = z + dir4[i];
+	RemoveCount(check);
+      }
     }
-  }
-  return prisoner;
+    return prisoner;
 }
 
 int main()
@@ -248,21 +281,20 @@ int main()
   
   int *inputx,*inputy;
   
+  /*碁盤の初期化*/
   BoardIni();
-
-  color = BLACK;
-  CheckBoard();
-  printf("BLACK TURN\nx->"); scanf("%d",&inputx);
-  printf("y->"); scanf("%d",&inputy);
-  CheckPut(inputx,inputy);
-  if(z == -1){
-    printf("end\n");
-  }
-  CheckBoard();
-  printf("z:%d %d-%d\n",color,inputx,inputy);
   
+  printf("Program Start\n");
+
+  /*アゲハマ*/
+  prisoner_b = 0;
+  prisoner_w = 0;
+
+  color = WHITE;
+ 
   while(1)
     {
+      CheckBoard();
       color = FlipColor(color);
       if(color == 1){
       printf("BLACK TURN\nx->");
@@ -276,8 +308,7 @@ int main()
 	printf("end\n");
 	break;
       }
-      CheckBoard();
-      printf("z:%d %d-%d\n",color,inputx,inputy);
+      printf("z:%d %d-%d\n",z,inputx,inputy);
     }
   
   return 0;
