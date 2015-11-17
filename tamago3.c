@@ -1,31 +1,37 @@
 #include<stdio.h>
 
-#define B_SIZE 9
-#define WIDTH (B_SIZE+2)
-#define ALLBOARD (WIDTH * WIDTH)
-#define EMPTY 0
-#define BLACK 1
-#define WHITE 2
-#define WALL 3
-#define MARK 1
+#define B_SIZE 9                  //BOARDSIZE
+#define WIDTH (B_SIZE+2)          //BOARDSIZE+WALL
+#define ALLBOARD (WIDTH * WIDTH)  //盤外を含めたBOARDSIZE
 
+#define EMPTY 0 //空点
+#define BLACK 1 //黒石
+#define WHITE 2 //白石
+#define WALL 3  //盤外
+#define MARK 1  //マーク
 
+/*------------------------------------------------------*/
+/* 変数                                                 */
+/*------------------------------------------------------*/
 int board[ALLBOARD] = {};
 int check_board[ALLBOARD] = {};
 int dir4[4] = {+1,+WIDTH,-1,-WIDTH};
-int dir8[8] = {};   
+int dir8[8] = {+1,+1+WIDTH,+WIDTH,-1+WIDTH,-1,-1-WIDTH,-WIDTH,+1-WIDTH};   
 int color,z,prisoner_b,prisoner_w;
 
-void CheckBoard(void);
-void CheckBoard_check(void);
-void BoardIni(void);
-void ClearCheckBoard(void);
-int CheckPut(int x,int y);
-int FlipColor(int color);
-int CheckWarning(int z);
-int TakeStone(int z);
-int RemoveStone(int z);
-int RemoveCount(int z);
+/*-------------------------------------------------------*/
+/* 関数                                                  */
+/*-------------------------------------------------------*/
+void CheckBoard(void);        // 盤面(board)の表示
+void CheckBoard_check(void);  // check_boardの表示
+void BoardIni(void);          // 盤面(board)の初期化
+void ClearCheckBoard(void);   // check_boardの初期化
+int CheckPut(int x,int y);    // 石を置く
+int FlipColor(int color);     // 色(手番)の反転
+int CheckWarning(int z);      // 自殺手かどうか調べる
+int TakeStone(int z);         // zの石が囲まれているか調べる
+int RemoveStone(int z);       // TakeStoneがTRUEならばRemoveCountを呼び出す
+int RemoveCount(int z);       // 囲まれた石を取り除きアゲハマ(prisoner)を返す
 
 void CheckBoard(void)
 {
@@ -172,9 +178,6 @@ int CheckWarning(int z)
   check = 0;
   flag = 0;
 
-  //printf("color;%d\n",color);
-  //printf("z;%d\n",z);
-
   if(color == BLACK){
     for(i = 0; i < 4; i++){
       check = z + dir4[i];
@@ -186,15 +189,12 @@ int CheckWarning(int z)
   }else{
     for(i = 0; i < 4; i++){
       check = z + dir4[i];
-  //printf("check[%d];%d\n",i,check);
       if(board[check] == WHITE){;
       }else if(board[check] != EMPTY ){
 	flag += 1;
       }
     }
   }
-
-  //printf("flag;%d\n",flag);
 
   if(flag == 4){
     printf("Here is ban position.\n");
@@ -209,6 +209,8 @@ int TakeStone(int z)
   int i,check,rtn,uncolor;
   
   uncolor = FlipColor(color);
+  printf("uncolor=%d\n",uncolor);
+
 
     if(check_board[z] == MARK ){
       return -1;
@@ -275,6 +277,9 @@ int RemoveCount(int z)
     return prisoner;
 }
 
+/*-------------------------------------------------------*/
+/* main関数                                              */
+/*-------------------------------------------------------*/
 int main()
 {  
   
@@ -289,19 +294,23 @@ int main()
   prisoner_b = 0;
   prisoner_w = 0;
 
-  color = WHITE;
+  color = WHITE; //初手を黒にするために白を代入
  
   while(1)
     {
+      /*碁盤を表示*/
       CheckBoard();
+      /*手盤の反転*/
       color = FlipColor(color);
       if(color == 1){
       printf("BLACK TURN\nx->");
       }else{
 	printf("WHITE TURN\nx->");
       }
+      /*手の入力*/
       scanf("%d",&inputx);
       printf("y->"); scanf("%d",&inputy);
+      /*着手*/
       CheckPut(inputx,inputy);
       if(z == -1){
 	printf("end\n");
