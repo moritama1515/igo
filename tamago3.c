@@ -154,23 +154,12 @@ int CheckPut(int x,int y)
     if(color == BLACK){
       for(i = 0; i < 4; i++){
 	check = z + dir4[i];
-	printf("put[%d];%d\n",i,check);
-	if(TakeStone(check) == 0){
-	  prisoner_b = RemoveStone(check);
-	}else{
-	  ClearCheckBoard;
-	}
+	prisoner_b = RemoveStone(check);
       }
     }else{
       for(i = 0; i < 4; i++){
-	CheckBoard_check();
 	check = z + dir4[i];
-	printf("put[%d];%d\n",i,check);
-	if(TakeStone(check) == 0){
-	  prisoner_w = RemoveStone(check);
-	}else{
-	   ClearCheckBoard;
-	} 
+	prisoner_w = RemoveStone(check);
       }
     }   
     return z;
@@ -217,8 +206,10 @@ int CheckWarning(int z)
 
 int TakeStone(int z)
 {
-  int i,check,rtn;
+  int i,check,rtn,uncolor;
   
+  uncolor = FlipColor(color);
+
     if(check_board[z] == MARK ){
       return -1;
     }
@@ -226,6 +217,10 @@ int TakeStone(int z)
     check_board[z] = MARK;
       
     if(board[z] == EMPTY){
+      return -1;
+    }
+    
+    if(board[z] == uncolor){
       for(i = 0; i < 4; i++){
 	check = z + dir4[i];
 	if(TakeStone(check) == -1){
@@ -239,16 +234,13 @@ int TakeStone(int z)
 int RemoveStone(int z)
 {
   int prisoner;
-  
+
+  printf("RemoveStone;%d\n",prisoner);  
   if(board[z] == color){
     return 0;
   }
 
   if(board[z] == EMPTY){
-    return 0;
-  }
-
-  if(board[z] == WALL){
     return 0;
   }
 
@@ -263,16 +255,23 @@ int RemoveStone(int z)
 
 int RemoveCount(int z)
 {
-  int i,check,prisoner;
-  
-    if(board[z] == color){
-      prisoner += 1;
+  int i,check,prisoner,uncolor;
+
+  uncolor = FlipColor(color);
+
+  printf("removecount\n");
+    if(board[z] == uncolor){
+      prisoner++;
+      printf("RemoveCount;%d\n",prisoner);
       board[z] = EMPTY;
       for(i = 0; i < 4; i++){
 	check = z + dir4[i];
-	RemoveCount(check);
+	prisoner = RemoveCount(check);
+	printf("RemoveCount[%d];%d\n",i,prisoner);
       }
     }
+
+    printf("RemoveCountend;%d\n",prisoner);
     return prisoner;
 }
 
