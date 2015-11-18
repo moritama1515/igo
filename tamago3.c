@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<stdlib.h>
 
 #define B_SIZE 9                  //BOARDSIZE
 #define WIDTH (B_SIZE+2)          //BOARDSIZE+WALL
@@ -171,28 +172,51 @@ void ClearCheckBoard()
 /* 着手場所の入力 */
 void InputMap(int *x,int*y)
 {
-  int inputx,inputy;
+  int inputX,inputY;
+  char inpx[10],inpy[10];
 
     /*手盤の反転*/
     color = FlipColor(color);
     CheckBoard();
     while(1){
       if(color == 1){
-	printf("BLACK TURN\nx->");
+	printf("BLACK TURN    Pass->20\n");
       }else{
-	printf("WHITE TURN\nx->");
+	printf("WHITE TURN    Pass->20\n");
       }
       /*手の入力*/
-      scanf("%d",&inputx);
-      printf("y->"); scanf("%d",&inputy);
-      if(inputx < 20 && inputy < 20){
+      printf("x->");
+      fgets(inpx,10,stdin);
+      inputX = atoi(inpx);
+      
+      /* Pass */
+      if(inputX == 20 && color == 1){
+        printf("Pass\n");
+	break;
+      }else if(inputX == 20 && color == 2){
+        printf("Pass\n");
 	break;
       }
-      printf("Try Again! Input is 0 ~ 19.\n");
-    }
-  *x = inputx;
-  *y = inputy;
+     
+      printf("y->");
+      fgets(inpy,10,stdin);
+      inputY = atoi(inpy);
 
+      if(inputX != 0 && inputY != 0 && inputX < 20 && inputY < 20){
+	break;
+      }      
+
+      printf("Try Again! Input is 1 ~ 19.\n");
+    }
+ 
+    if(inputX == 20 && color == 1){
+      *x = 0;
+    }else if(inputX == 20 && color == 2){
+      *y = 0;
+    }else{
+      *x = inputX;
+      *y = inputY;
+    }
 }
 /* 色(手番)の反転 */
 int FlipColor(int color)
@@ -205,7 +229,12 @@ int CheckPut(int x,int y)
 {
   int i,check;
 
+  if(x == 0 | y == 0){
+    return -1;
+  }
+
   z = (WIDTH*y) + x;
+
   if(z <= ALLBOARD && board[z] == EMPTY && CheckWarning(z) != -1){
     board[z] = color;
   }else{
@@ -351,14 +380,16 @@ int main()
   while(1){ 
     /*着手場所の入力*/
     InputMap(&x,&y);
+    
+    if(x == 0 && y == 0){
+      printf("Program End\n");
+	break;
+    }
+    
     /*着手*/
     CheckPut(x,y);
     if(z == -1){
       printf("end\n");
-    }
-    if(x == 0 || y == 0){
-      printf("Program End\n");
-      break;
     }
     printf("z:%d %d-%d\n",z,x,y);
   }
