@@ -173,40 +173,38 @@ void ClearCheckBoard()
 void InputMap(int *x,int*y)
 {
   int inputX,inputY;
-  char inpx[10],inpy[10];
+  char inpx[5],inpy[5];
 
     /*手盤の反転*/
     color = FlipColor(color);
     CheckBoard();
     while(1){
       if(color == 1){
-	printf("BLACK TURN    Pass->20\n");
+	printf("BLACK TURN    Pass -> 0\n");
       }else{
-	printf("WHITE TURN    Pass->20\n");
+	printf("WHITE TURN    Pass -> 0\n");
       }
       /*手の入力*/
       printf("x->");
-      fgets(inpx,10,stdin);
+      fgets(inpx,5,stdin);
       inputX = atoi(inpx);
       
       /* Pass */
-      if(inputX == 20 && color == 1){
-        printf("Pass\n");
-	break;
-      }else if(inputX == 20 && color == 2){
+      if(inputX == 20){
         printf("Pass\n");
 	break;
       }
      
       printf("y->");
-      fgets(inpy,10,stdin);
+      fgets(inpy,5,stdin);
       inputY = atoi(inpy);
 
       if(inputX != 0 && inputY != 0 && inputX < 20 && inputY < 20){
 	break;
-      }      
+      }     
 
       printf("Try Again! Input is 1 ~ 19.\n");
+
     }
  
     if(inputX == 20 && color == 1){
@@ -227,67 +225,76 @@ int FlipColor(int color)
 /* 石を置く */
 int CheckPut(int x,int y)
 {
-  int i,check;
+  int i,check,remove,care;
 
   if(x == 0 | y == 0){
     return -1;
   }
 
   z = (WIDTH*y) + x;
+  remove = 0;
 
-  if(z <= ALLBOARD && board[z] == EMPTY && CheckWarning(z) != -1){
+  ClearCheckBoard();
+
+  if(z <= ALLBOARD && board[z] == EMPTY ){
     board[z] = color;
   }else{
+    color = FlipColor(color);
     printf("Put error.\n");
-    return -1;
+  }
+
+  if(color == BLACK){
+    for(i = 0; i < 4; i++){
+      check = z + dir4[i];
+      remove = RemoveStone(check);
+      if(remove != 0){
+	prisoner_b += remove;
+      }
+    }
+  }else{
+    for(i = 0; i < 4; i++){
+      check = z + dir4[i];
+      remove = RemoveStone(check);
+      if(remove != 0){
+	prisoner_w += remove;
+      }
+    }
   }
   
-    if(color == BLACK){
-      for(i = 0; i < 4; i++){
-	check = z + dir4[i];
-	prisoner_b = RemoveStone(check);
-      }
-    }else{
-      for(i = 0; i < 4; i++){
-	check = z + dir4[i];
-	prisoner_w = RemoveStone(check);
-      }
-    }   
+
+
+  board[z] = EMPTY;
+
+  if(CheckWarning(z) != -1){
+    board[z] = color;
+  }else{
+    color = FlipColor(color);
+    printf("Put error.\n");
+  }
+
     return z;
 }
 
 /* 自殺手かどうか調べる */
 int CheckWarning(int z)
 {
-  int check,flag,i;
+  int uncolor,check,i;
 
-  check = 0;
-  flag = 0;
+  board[z] = color;
 
-  if(color == BLACK){
-    for(i = 0; i < 4; i++){
-      check = z + dir4[i];
-      if(board[check] == BLACK){;
-      }else if(board[check] != EMPTY ){
-	flag += 1;
-      }
+  ClearCheckBoard();
+
+  color = FlipColor(color);
+  check = TakeStone(z);
+  color = FlipColor(color);
+
+    if(check == 0){
+      board[z] = EMPTY;
+      return -1;
     }
-  }else{
-    for(i = 0; i < 4; i++){
-      check = z + dir4[i];
-      if(board[check] == WHITE){;
-      }else if(board[check] != EMPTY ){
-	flag += 1;
-      }
-    }
-  }
-
-  if(flag == 4){
-    printf("Here is ban position.\n");
-    return -1;
-      }
-  
-  return 0;
+    
+    
+    return 0;
 }
 
 /* zの石が囲まれているか調べる */
@@ -303,7 +310,7 @@ int TakeStone(int z)
     
     check_board[z] = MARK;
       
-    if(board[z] == EMPTY){
+    if(board[z] == EMPTY ){
       return -1;
     }
     
@@ -348,7 +355,7 @@ int RemoveCount(int z,int prisoner)
   uncolor = FlipColor(color);
 
     if(board[z] == uncolor){
-      prisoner++;
+      prisoner += 1;
       board[z] = EMPTY;
       for(i = 0; i < 4; i++){
 	check = z + dir4[i];
@@ -385,12 +392,7 @@ int main()
       printf("Program End\n");
 	break;
     }
-    
-    /*着手*/
     CheckPut(x,y);
-    if(z == -1){
-      printf("end\n");
-    }
     printf("z:%d %d-%d\n",z,x,y);
   }
 
