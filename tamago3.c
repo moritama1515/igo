@@ -298,7 +298,7 @@ int TakeStone(int z)
   uncolor = FlipColor(color);
 
     if(check_board[z] == MARK ){
-      return -1;
+      return 0;
     }
     
     check_board[z] = MARK;
