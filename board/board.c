@@ -2,7 +2,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#define B_SIZE 9                  //BOARDSIZE
+#define B_SIZE 19                  //BOARDSIZE
 #define WIDTH (B_SIZE+2)          //BOARDSIZE+WALL
 #define ALLBOARD (WIDTH * WIDTH)  //盤外を含めたBOARDSIZE
 
