@@ -26,8 +26,14 @@ int dir8[8] = {+1,+1+WIDTH,+WIDTH,-1+WIDTH,-1,-1-WIDTH,-WIDTH,+1-WIDTH};
 int color;
 /* 着手場所 */
 int x,y,z;
+/* コウの位置 */
+int ko_z;
 /* アゲハマ */
 int prisoner_b,prisoner_w;
+/* 手数 */
+int move;
+/* コウの発生手数 */
+int ko_num;
 
 /*-------------------------------------------------------*/
 /* 関数                                                  */
@@ -88,7 +94,7 @@ void CheckBoard(void)
 	printf("%3d\n",board[i]);
       }
     }
-  printf("BLACK:%d,WHITE:%d\n",prisoner_b,prisoner_w);
+  printf("\nBLACK:%d,WHITE:%d\n",prisoner_b,prisoner_w);
 }
 
 /* check_boardの表示 */
@@ -192,6 +198,7 @@ void InputMap(int *x,int*y)
       
       /* Pass */
       if(inputX == 20){
+	move++;
         printf("Pass\n");
 	break;
       }
@@ -205,6 +212,7 @@ void InputMap(int *x,int*y)
       }     
 
       printf("Try Again! Input is 1 ~ 19.\n");
+      printf("If you want to exit,please enter 20 twice.\n");
 
     }
  
@@ -226,7 +234,7 @@ int FlipColor(int color)
 /* 石を置く */
 int CheckPut(int x,int y)
 {
-  int i,check,remove,care;
+  int i,check,remove,koflag;
 
   if(x == 0 | y == 0){
     return -1;
@@ -234,8 +242,16 @@ int CheckPut(int x,int y)
 
   z = (WIDTH * y) + x;
   remove = 0;
+  koflag = 1;
 
   ClearCheckBoard();
+
+  /* コウの処理 */  
+  if(z == ko_z && move == ko_num){
+    color = FlipColor(color);
+    printf("Ko has occurred.Here is ban position.\n");
+    return z;
+  }
 
   if(z <= ALLBOARD && board[z] == EMPTY){
     board[z] = color;
@@ -243,11 +259,29 @@ int CheckPut(int x,int y)
     color = FlipColor(color);
     printf("Put error.\n");
     return z;
+  }  
+
+  for(i = 0; i < 4; i++){
+    check = z + dir4[i];
+    if(board[check] == color){
+      koflag = 0;
+    }
   }
 
   for(i = 0; i < 4; i++){
     check = z + dir4[i];
     remove = RemoveStone(check);
+    
+    if(koflag == 1 && remove == 1){
+      ko_num = (move + 1);
+      for(i = 0; i < 4; i++){
+	check = z + dir4[i];
+	if(board[check] == EMPTY){
+	  ko_z = check;
+	}
+      }
+    }
+    
     if(remove != 0){
       if(color == BLACK){
 	prisoner_b += remove;
@@ -255,12 +289,14 @@ int CheckPut(int x,int y)
 	prisoner_w += remove;
       }
     }
+
   }
-  
+
   board[z] = EMPTY;
   
   if(CheckWarning(z) != -1){
     board[z] = color;
+    move++;
   }else{
     color = FlipColor(color);
     printf("Put error.\n");
@@ -277,6 +313,7 @@ int CheckWarning(int z)
   board[z] = color;
 
   ClearCheckBoard();
+
 
   color = FlipColor(color);
   check = TakeStone(z);
@@ -369,6 +406,10 @@ int main()
   
   printf("Program Start\n");
 
+  move = 0;
+  ko_z = 0;
+  ko_num = 0;
+
   /*アゲハマ*/
   prisoner_b = 0;
   prisoner_w = 0;
@@ -384,7 +425,8 @@ int main()
       break;
     }
     CheckPut(x,y);
-    printf("z:%d %d-%d\n",z,x,y);
+    printf("z:%d %d-%d\nmove:%d\n",z,x,y,move);
+    printf("ko_num:%d ko_z:%d\n",ko_num,ko_z);
   }
   
   return 0;
