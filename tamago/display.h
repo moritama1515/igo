@@ -2,14 +2,14 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-#define B_SIZE 19                 //BOARDSIZE                                   
-#define WIDTH (B_SIZE+2)          //BOARDSIZE+WALL                              
-#define ALLBOARD (WIDTH * WIDTH)  //盤外を含めたBOARDSIZE                       
+#define B_SIZE 19                 //BOARDSIZE
+#define WIDTH (B_SIZE+2)          //BOARDSIZE+WALL
+#define ALLBOARD (WIDTH * WIDTH)  //盤外を含めたBOARDSIZE
 
-#define EMPTY 0 //空点                                                          
-#define BLACK 1 //黒石                                                          
-#define WHITE 2 //白石                                                          
-#define WALL 3  //盤外                                                          
+#define EMPTY 0 //空点
+#define BLACK 1 //黒石
+#define WHITE 2 //白石
+#define WALL 3  //盤外
 #define MARK 1  //マーク
 
 /* 碁盤 */
@@ -30,6 +30,9 @@ extern int prisoner_b,prisoner_w;
 extern int move;
 /* コウの発生手数 */
 extern int ko_num;
+/* エラー処理 */
+extern int error;
+
 
 /* 盤面(board)の表示 */
 void CheckBoard(void);

@@ -7,11 +7,14 @@
 #define WIDTH (B_SIZE+2)          //BOARDSIZE+WALL
 #define ALLBOARD (WIDTH * WIDTH)  //盤外を含めたBOARDSIZE
 
-#define EMPTY 0 //空点
-#define BLACK 1 //黒石
-#define WHITE 2 //白石
-#define WALL 3  //盤外
-#define MARK 1  //マーク
+#define EMPTY 0   //空点
+#define BLACK 1   //黒石
+#define WHITE 2   //白石
+#define WALL 3    //盤外
+#define MARK 1    //マーク
+#define PLAYER 1  //プレイヤーの色
+#define COM 2     //COMの色
+
 
 //------------------------------------------------------
 // 変数                                                 
@@ -35,6 +38,37 @@ int prisoner_b,prisoner_w;
 int move;
 /* コウの発生手数 */
 int ko_num;
+/* エラー処理 */
+int error;
+
+//------------------------------------------------------
+// 関数
+//------------------------------------------------------ 
+void TamagoMove(int *x,int *y);
+int GenerateZ(void);
+
+void TamagoMove(int *x,int *y)
+{
+  if(error == 1) return;
+
+  color = COM;
+
+  z = GenerateZ();
+  *y = z / WIDTH;
+  *x = z % WIDTH;
+
+  error = CheckPut(*x,*y);
+
+}
+
+int GenerateZ(){
+  while(1){
+    z = rand() % ( ALLBOARD + WIDTH);
+    if(board[z] == EMPTY){
+      return z;
+    }
+  }
+}
 
 //-------------------------------------------------------
 // main関数                                              
@@ -47,20 +81,21 @@ int main()
   BoardIni();  
   
   while(1){ 
-    
+
     InputMap(&x,&y);
-    
+        
     if(x == 0 && y == 0){
       printf("Program End\n");
       break;
     }
     
-    CheckPut(x,y);
+    error = CheckPut(x,y);
     
     printf("z:%d %d-%d\nmove:%d\n",z,x,y,move);
+
+    TamagoMove(&x,&y);
   }
 
   return 0;  
 }
   
-      

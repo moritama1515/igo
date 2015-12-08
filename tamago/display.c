@@ -3,15 +3,17 @@
 #include <stdlib.h>
 #include "display.h"
 
-#define B_SIZE 19                  //BOARDSIZE                                  
-#define WIDTH (B_SIZE+2)          //BOARDSIZE+WALL                              
-#define ALLBOARD (WIDTH * WIDTH)  //盤外を含めたBOARDSIZE                       
+#define B_SIZE 19                 //BOARDSIZE
+#define WIDTH (B_SIZE+2)          //BOARDSIZE+WALL
+#define ALLBOARD (WIDTH * WIDTH)  //盤外を含めたBOARDSIZE
 
-#define EMPTY 0 //空点                                                          
-#define BLACK 1 //黒石                                                          
-#define WHITE 2 //白石                                                          
-#define WALL 3  //盤外                                                          
-#define MARK 1  //マーク             
+#define EMPTY 0   //空点
+#define BLACK 1   //黒石
+#define WHITE 2   //白石
+#define WALL 3    //盤外
+#define MARK 1    //マーク
+#define PLAYER 1  //プレイヤーの色
+#define COM 2     //COMの色        
 
 /* 盤面(board)の表示 */
 void CheckBoard(void);
@@ -35,7 +37,6 @@ int TakeStone(int z);
 int RemoveStone(int z);
 /* 囲まれた石を取り除きアゲハマ(prisoner)を返す */
 int RemoveCount(int z,int prisoner);
-
 
 void CheckBoard(void)
 {
@@ -108,12 +109,13 @@ void BoardIni()
   move = 0;
   ko_z = 0;
   ko_num = 0;
+  error = 0;
 
   /*アゲハマ*/
   prisoner_b = 0;
   prisoner_w = 0;
 
-  color = WHITE; //初手を黒にするために白を代入     
+  color = PLAYER;
 
   for(i = 0; i < ALLBOARD-WIDTH; i++)
     {
@@ -159,14 +161,15 @@ void InputMap(int *x,int*y)
   int inputX,inputY;
   char inpx[5],inpy[5];
 
-  /*手盤の反転*/
-  color = FlipColor(color);
+  if(error == -1) return;
+
+  color = PLAYER;
   CheckBoard();
   while(1){
     if(color == 1){
-      printf("BLACK TURN    Pass -> 20\n");
+      printf("BLACK TURN    Pass -> 20   end -> 0\n");
     }else{
-      printf("WHITE TURN    Pass -> 20\n");
+      printf("WHITE TURN    Pass -> 20   end -> 0\n");
     }
 
     /*手の入力*/
@@ -179,6 +182,13 @@ void InputMap(int *x,int*y)
       move++;
       printf("Pass\n");
       break;
+    }
+
+    /* End */
+    if(inputX == 0){
+      *x = 0;
+      *y = 0;
+      return;
     }
 
     printf("y -> ");
@@ -213,10 +223,6 @@ int CheckPut(int x,int y)
 {
   int i,check,remove,koflag;
 
-  if(x == 0 | y == 0){
-    return -1;
-  }
-
   z = (WIDTH * y) + x;
   remove = 0;
   koflag = 1;
@@ -225,19 +231,25 @@ int CheckPut(int x,int y)
 
   /* コウの処理 */
   if(z == ko_z && move == ko_num){
-    color = FlipColor(color);
     printf("Ko has occurred.Here is ban position.\n");
-    return z;
+    if(color == PLAYER){
+      return -1;
+    }else{
+      return 1;
+    }    
   }
 
   if(z <= ALLBOARD && board[z] == EMPTY){
     board[z] = color;
   }else{
-    color = FlipColor(color);
     printf("Put error.\n");
-    return z;
+    if(color == PLAYER){
+      return -1;
+    }else{
+      return 1;
+    }
   }
-
+  
   for(i = 0; i < 4; i++){
     check = z + dir4[i];
     if(board[check] == color){
@@ -275,7 +287,11 @@ int CheckPut(int x,int y)
     board[z] = color;
     move++;
   }else{
-    color = FlipColor(color);
+    if(color == PLAYER){
+      return -1;
+    }else{
+      return 1;
+    }
     printf("Put error.\n");
   }
 
