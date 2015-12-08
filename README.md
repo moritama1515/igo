@@ -4,7 +4,8 @@ Tamago
 現在は人対人用のプログラムですが，最終的には対人プログラムにする予定です．
 
 ## Description
-tamago3.cが本体です．
+boardは人対人用のプログラムです．
+tamagoは対人プログラム（の予定）．
 
 ## Usage
 x -> (Input from 1 to 19)
