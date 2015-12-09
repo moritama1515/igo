@@ -161,8 +161,6 @@ void InputMap(int *x,int*y)
   int inputX,inputY;
   char inpx[5],inpy[5];
 
-  if(error == -1) return;
-
   color = PLAYER;
   CheckBoard();
   while(1){
@@ -198,12 +196,11 @@ void InputMap(int *x,int*y)
     if(inputX != 0 && inputY != 0 && inputX < 20 && inputY < 20){
       break;
     }
-
     printf("Try Again! Input is 1 ~ 19.\n");
     printf("If you want to exit,please enter 20 twice.\n");
 
   }
-
+  
   if(inputX == 20 && color == 1){
     *x = 0;
   }else if(inputX == 20 && color == 2){
@@ -242,7 +239,7 @@ int CheckPut(int x,int y)
   if(z <= ALLBOARD && board[z] == EMPTY){
     board[z] = color;
   }else{
-    printf("Put error.\n");
+    printf("Put error.EMP\n");
     if(color == PLAYER){
       return -1;
     }else{
@@ -292,7 +289,7 @@ int CheckPut(int x,int y)
     }else{
       return 1;
     }
-    printf("Put error.\n");
+    printf("Put error.Check\n");
   }
 
   return z;
